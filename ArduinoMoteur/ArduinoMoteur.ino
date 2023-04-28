@@ -11,8 +11,8 @@
 // 4-> Open Folder ArduinoMotor
 
 // define good motor
-//#define LEFT_MOTOR_SEGWAY
-#define MOTOR_SALLE_AUTOM
+#define LEFT_MOTOR_SEGWAY
+//#define MOTOR_SALLE_AUTOM
 
 #include "rtwtypes.h"
 
@@ -31,10 +31,12 @@ void initDerivativeFilter(float tauSec, float TECH)
   dv_tau = tauSec;
   // expression du filtre en p : p /( tau . p+1), a traduit en z^-1
 }
+
+static float thm_2 = 0;
 void oneStepDerivativeFilter(float thm, float &vthm)
 {
-  // a coder
-  vthm = 0;
+  vthm = vthm - 0.965*thm_2 + thm * 1.035;
+  thm_2 = thm;
 }
 
 /*-----------------------------------------------------------
@@ -55,7 +57,7 @@ static float motorEncoderScale = 0.5 * (M_PI * 2.0) / (120.0 * 32.0);
 /*-----------------------------------------------------------
 Motor control part
 -----------------------------------------------------------*/
-static float refthm, thm = 0;
+static float refthm = 5, thm = 0, y_1 = 0,y_2 = 0, x_1 = 0, x_2 = 0;
 void initMotorControl( float Te)
 {
     // parametres d'un regulateur a temps continu convenable pour le controle du moteur
@@ -65,7 +67,11 @@ void initMotorControl( float Te)
 }
 void oneStepMotorControl(float &u)
 {
-  // a modifier, calculer u = commande = fct(reference : refthm , mesure :thm)
+  x_1 = (refthm - thm)*9;
+  y_1 = y_2 + x_1 * 77 - x_2 * 77; 
+  u = 60 * y_1*1.035-y_2*0.965+u;
+  y_2 = y_1;
+  x_2 = x_1;
 }
 static int nbPwm=0;
 void initMotor()
@@ -138,15 +144,17 @@ void loop()
     thm=motorEncoder*motorEncoderScale; // position angulaire en radians
     oneStepDerivativeFilter(thm, vthm); // estime la vitesse du moteur depuis la position
     // application de u passant alternativement de 1 a 2 volts
-    if ((count & 255) < 128)
-    {
-      u = 1;
-    }
-    else
-    {
-      u = 2;
-    }
+    //if ((count & 255) < 128)
+    //{
+    //  u = 1;
+    //}
+    //else
+    //{
+    //  u = 2;
+    //}
     oneStepMotorControl(u); // do nothing for instance
+    
+
     applyControl(u);
     if (showSerialData)
     {

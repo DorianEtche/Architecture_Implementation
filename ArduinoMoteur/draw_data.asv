@@ -10,32 +10,23 @@ N=length(u);
 t=Tech*(1:N);
 t=transpose(t);
 figure;
-subplot(2,1,1);plot(t,u); grid on;title("command");
+subplot(2,1,1);plot(t,u); grid on;
 subplot(2,1,2);plot(t,pos); grid on;
 
+
+p = tf([1 0],[1])
 Te = 0.01;
 Fe = 1/Te;
-
+we = 2*pi*Fe;
 tau = 2;
 wc = 1/tau;
-wc_t = tan(wc*Te/2)*(2/Te);
+wc_t = tan(wc*Te/2)*(Te/2);
 tau_t = 1/wc_t;
 
-Fp = tf([1 0],[1 wc_t])
-Fz = c2d(Fp,Te,'tustin')
+wi_t = wc_t / (tan(pi/2));
+
+Cpi_t = ()
 
 figure;
-bode(Fz)
-
-p = tf([1 0],[1]);
-
-we = 2*pi*Fe;
-wu = 70;
-wi = wu/10;
-wi_t = tan(wi*Te/2)*(2/Te);
-Cpi_t = (p+wi_t)/(p)
-Cpi_z = c2d(Cpi_t,Te,'tustin')
-
-figure;
-bode(Cpi_z)
+bode(fz)
 
